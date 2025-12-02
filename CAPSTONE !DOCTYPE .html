@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Comprehensive offline-ready education platform for rural learners">
+    <title>RuralEd Hub - Enhanced Learning Platform</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- jsPDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner">
+        <div class="spinner-border text-success" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+        <div id="mainToast" class="toast" role="alert">
+            <div class="toast-header">
+                <strong class="me-auto">Notification</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">Welcome to RuralEd Hub!</div>
+        </div>
+    </div>
+
+    <!-- Offline Notice -->
+    <div id="offlineNotice" class="offline-notice alert alert-warning alert-dismissible fade show">
+        <i class="bi bi-wifi-off"></i> You're offline. Access saved courses, uploads, and quizzes.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Accessibility Toolbar -->
+    <div class="accessibility-toolbar">
+        <button class="btn btn-sm btn-outline-primary" onclick="toggleFontSize()" title="Increase Font Size">
+            <i class="bi bi-fonts"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-primary" onclick="toggleContrast()" title="High Contrast">
+            <i class="bi bi-circle-half"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-primary" onclick="toggleDyslexiaFont()" title="Dyslexia Font">
+            <i class="bi bi-type"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-primary" onclick="readPage()" title="Read Page">
+            <i class="bi bi-volume-up"></i>
+        </button>
+    </div>
+
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <label for="langSelect" class="visually-hidden">Select Language</label>
+        <select id="langSelect" onchange="changeLanguage()" aria-label="Select language">
+            <option value="en">English</option>
+            <option value="hi">हिंदी</option>
+            <option value="ta">தமிழ்</option>
+            <option value="te">తెలుగు</option>
+            <option value="bn">বাংলা</option>
+            <option value="kn">ಕನ್ನಡ</option>
+        </select>
+    </div>
+
+    <!-- Dark Mode Toggle -->
+    <button class="btn btn-outline-secondary dark-mode-toggle" id="darkModeToggle" onclick="toggleDarkMode()">
+        <i class="bi bi-moon-fill"></i> Dark Mode
+    </button>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-book"></i> RuralEd Hub
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#home"><i class="bi bi-house"></i> Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#courses"><i class="bi bi-journal-text"></i> Courses</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#resources"><i class="bi bi-folder"></i> Resources</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#assessment"><i class="bi bi-clipboard-check"></i> Assessment</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#library"><i class="bi bi-collection"></i> Library</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#mentorship"><i class="bi bi-people"></i> Mentorship</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#forum"><i class="bi bi-chat-dots"></i> Forum</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <div class="row text-center mb-4">
+                <div class="col-md-3 col-6">
+                    <div class="stat-card">
+                        <h3 id="totalCourses">500+</h3>
+                        <p>Total Courses</p>
+                        <i class="bi bi-journals"></i>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card">
+                        <h3 id="enrollments">10K+</h3>
+                        <p>Enrollments</p>
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card">
+                        <h3 id="certifications">2K+</h3>
+                        <p>Certifications</p>
+                        <i class="bi bi-award"></i>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card">
+                        <h3 id="uploads">1K+</h3>
+                        <p>User Uploads</p>
+                        <i class="bi bi-cloud-upload"></i>
+                    </div>
+                </div>
+            </div>
+            <h1 class="display-4 mt-4">Unlock Learning Anywhere</h1>
+            <p class="lead">Free, offline-ready quality education for rural students. Build your foundation, earn certificates, and create a brighter future!</p>
+            <div class="hero-buttons">
+                <a href="#courses" class="btn btn-light btn-lg me-2"><i class="bi bi-play-circle"></i> Start Learning</a>
+                <button class="btn btn-outline-light btn-lg" onclick="takeAssessment()"><i class="bi bi-clipboard-check"></i> Take Assessment</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why RuralEd Hub -->
+    <section class="section bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5"><i class="bi bi-star-fill text-warning"></i> Why RuralEd Hub?</h2>
+            <div class="row g-4">
+                <div class="col-md-3 col-sm-6">
+                    <div class="card feature-card text-center h-100">
+                        <div class="card-body">
+                            <i class="bi bi-wifi-off feature-icon"></i>
+                            <h5>Free & Offline</h5>
+                            <p>Access without internet, perfect for rural students</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="card feature-card text-center h-100">
+                        <div class="card-body">
+                            <i class="bi bi-clock-history feature-icon"></i>
+                            <h5>Self-Paced Learning</h5>
+                            <p>Build foundations at your own speed</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="card feature-card text-center h-100">
+                        <div class="card-body">
+                            <i class="bi bi-patch-check feature-icon"></i>
+                            <h5>Certifications</h5>
+                            <p>Earn certificates on completion</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="card feature-card text-center h-100">
+                        <div class="card-body">
+                            <i class="bi bi-translate feature-icon"></i>
+                            <h5>Multi-Language</h5>
+                            <p>Available in 6+ regional languages</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW: Adaptive Learning Assessment -->
+    <section id="assessment" class="section">
+        <div class="container">
+            <h2 class="text-center mb-5"><i class="bi bi-graph-up"></i> Adaptive Learning Assessment</h2>
+            <div class="row">
+                <div class="col-md-8 mx-auto">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Take Your Skill Assessment</h5>
+                            <p>Help us understand your current level to provide personalized learning recommendations.</p>
+                            <div class="assessment-options">
+                                <button class="btn btn-primary me-2" onclick="startAssessment('basic')">
+                                    <i class="bi bi-1-circle"></i> Basic Level
+                                </button>
+                                <button class="btn btn-primary me-2" onclick="startAssessment('intermediate')">
+                                    <i class="bi bi-2-circle"></i> Intermediate Level
+                                </button>
+                                <button class="btn btn-primary" onclick="startAssessment('advanced')">
+                                    <i class="bi bi-3-circle"></i> Advanced Level
+                                </button>
+                            </div>
+                            <div id="assessmentResults" class="mt-4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Courses Section with Enhanced Features -->
+    <section id="courses" class="section bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5"><i class="bi bi-journals"></i> Interactive Courses</h2>
+            
+            <!-- Course Filters -->
+            <div class="row mb-4">
+                <div class="col-md-4 mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control" id="searchInput" placeholder="Search courses..." onkeyup="searchCourses()">
+                        <button class="btn btn-outline-primary" onclick="playTTS('Type to search courses')">
+                            <i class="bi bi-volume-up"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <select class="form-select" id="categorySelect" onchange="filterCourses()">
+                        <option value="all">All Categories</option>
+                        <option value="basics">Basic Foundations</option>
+                        <option value="math">Mathematics</option>
+                        <option value="science">Science</option>
+                        <option value="language">Languages</option>
+                        <option value="rural">Rural Skills</option>
+                        <option value="social">Social Studies</option>
+                        <option value="programming">Programming</option>
+                        <option value="vocational">Vocational Training</option>
+                        <option value="health">Health & Wellness</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <select class="form-select" id="difficultySelect" onchange="filterCourses()">
+                        <option value="all">All Difficulty Levels</option>
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Course Grid -->
+            <div id="courseContainer" class="row g-4">
+                <!-- Courses will be dynamically loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW: Digital Library Section -->
+    <section id="library" class="section">
+        <div class="container">
+            <h2 class="text-center mb-5"><i class="bi bi-collection"></i> Digital Library</h2>
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <div class="card library-card" onclick="openLibrarySection('ebooks')">
+                        <div class="card-body text-center">
+                            <i class="bi bi-book library-icon"></i>
+                            <h5>E-Books</h5>
+                            <p>500+ downloadable books</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card library-card" onclick="openLibrarySection('videos')">
+                        <div class="card-body text-center">
+                            <i class="bi bi-play-circle library-icon"></i>
+                            <h5>Video Lessons</h5>
+                            <p>1000+ educational videos</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card library-card" onclick="openLibrarySection('worksheets')">
+                        <div class="card-body text-center">
+                            <i class="bi bi-file-earmark-text library-icon"></i>
+                            <h5>Worksheets</h5>
+                            <p>Practice materials</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card library-card" onclick="openLibrarySection('exams')">
+                        <div class="card-body text-center">
+                            <i class="bi bi-clipboard-data library-icon"></i>
+                            <h5>Past Exams</h5>
+                            <p>Previous year papers</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW: Mentorship Section -->
+    <section id="mentorship" class="section bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5"><i class="bi bi-people"></i> Mentorship & Peer Learning</h2>
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><i class="bi bi-person-badge"></i> Find a Mentor</h5>
+                            <p>Connect with experienced mentors for guidance and career advice</p>
+                            <button class="btn btn-primary" onclick="findMentor()">Find Mentor</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><i class="bi bi-people-fill"></i> Study Groups</h5>
+                            <p>Join or create study groups for collaborative learning</p>
+                            <button class="btn btn-primary" onclick="joinStudyGroup()">Join Group</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><i class="bi bi-chat-left-text"></i> Peer Tutoring</h5>
+                            <p>Become a tutor or get help from peers</p>
+                            <button class="btn btn-primary" onclick="peerTutoring()">Get Started</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><i class="bi bi-briefcase"></i> Career Guidance</h5>
+                            <p>Get career counseling and job readiness training</p>
+                            <button class="btn btn-primary" onclick="careerGuidance()">Learn More</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Resources & Instructor Portal -->
+    <section id="resources" class="section">
+        <div class="container">
+            <h2 class="text-center mb-5"><i class="bi bi-folder"></i> Resources & Instructor Portal</h2>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><i class="bi bi-file-pdf"></i> Upload Notes (PDF)</h5>
+                            <input type="file" class="form-control mb-2" id="notesUpload" accept=".pdf">
+                            <button class="btn btn-success" onclick="uploadFile('notes')">Upload Notes</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><i class="bi bi-camera-video"></i> Upload Videos</h5>
+                            <input type="file" class="form-control mb-2" id="videoUpload" accept="video/*">
+                            <button class="btn btn-success" onclick="uploadFile('video')">Upload Video</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><i class="bi bi-mic"></i> Record Audio</h5>
+                            <button class="btn btn-danger mb-2" id="recordBtn" onclick="startRecording()">
+                                <i class="bi bi-record-circle"></i> Start Recording
+                            </button>
+                            <button class="btn btn-success" id="stopBtn" onclick="stopRecording()" disabled>
+                                <i class="bi bi-stop-circle"></i> Stop
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NEW: Teacher Dashboard -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h5><i class="bi bi-person-workspace"></i> Teacher Dashboard</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" data-bs-toggle="tab" href="#createLesson">Create Lesson</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#createQuiz">Create Quiz</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#studentProgress">Student Progress</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#assignments">Assignments</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content mt-3">
+                                <div id="createLesson" class="tab-pane fade show active">
+                                    <h6>Create New Lesson</h6>
+                                    <input type="text" class="form-control mb-2" placeholder="Lesson Title">
+                                    <textarea class="form-control mb-2" rows="4" placeholder="Lesson Content"></textarea>
+                                    <button class="btn btn-primary" onclick="createLesson()">Save Lesson</button>
+                                </div>
+                                <div id="createQuiz" class="tab-pane fade">
+                                    <h6>Create New Quiz</h6>
+                                    <input type="text" class="form-control mb-2" placeholder="Quiz Title">
+                                    <div id="quizQuestions"></div>
+                                    <button class="btn btn-secondary mb-2" onclick="addQuestion()">Add Question</button>
+                                    <button class="btn btn-primary" onclick="saveQuiz()">Save Quiz</button>
+                                </div>
+                                <div id="studentProgress" class="tab-pane fade">
+                                    <h6>Student Progress Overview</h6>
+                                    <div id="progressTable"></div>
+                                </div>
+                                <div id="assignments" class="tab-pane fade">
+                                    <h6>Create Assignment</h6>
+                                    <input type="text" class="form-control mb-2" placeholder="Assignment Title">
+                                    <textarea class="form-control mb-2" rows="3" placeholder="Assignment Description"></textarea>
+                                    <input type="date" class="form-control mb-2" placeholder="Due Date">
+                                    <button class="btn btn-primary" onclick="createAssignment()">Create Assignment</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community Forum -->
+    <section id="forum" class="section bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5"><i class="bi bi-chat-dots"></i> Community Forum</h2>
+            <div class="row">
+                <div class="col-md-8 mx-auto">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>Recent Discussions</h5>
+                            <ul id="forumList" class="list-group mb-3">
+                                <li class="list-group-item">
+                                    <strong>Parent Query:</strong> Tips for home learning?
+                                    <button class="btn btn-sm btn-outline-primary float-end" onclick="replyToForum('Tips for home learning?')">Reply</button>
+                                </li>
+                            </ul>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="forumInput" placeholder="Post a new topic...">
+                                <button class="btn btn-success" onclick="postToForum()">Post</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NEW: Parent Community -->
+                    <div class="card mt-4">
+                        <div class="card-header bg-info text-white">
+                            <h5><i class="bi bi-people"></i> Parent Community</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="nav nav-pills mb-3">
+                                <li class="nav-item">
+                                    <a class="nav-link active" data-bs-toggle="pill" href="#parentForum">Forum</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="pill" href="#parentResources">Resources</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="pill" href="#successStories">Success Stories</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane fade show active" id="parentForum">
+                                    <p>Connect with other parents, share experiences, and support each other.</p>
+                                    <button class="btn btn-primary" onclick="joinParentForum()">Join Discussion</button>
+                                </div>
+                                <div class="tab-pane fade" id="parentResources">
+                                    <p>Access parenting guides, educational tips, and resources.</p>
+                                    <button class="btn btn-primary" onclick="viewParentResources()">View Resources</button>
+                                </div>
+                                <div class="tab-pane fade" id="successStories">
+                                    <p>Read inspiring stories of students who succeeded with family support.</p>
+                                    <button class="btn btn-primary" onclick="viewSuccessStories()">Read Stories</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard -->
+    <section id="dashboard" class="section">
+        <div class="container">
+            <h2 class="text-center mb-5"><i class="bi bi-speedometer2"></i> Your Dashboard</h2>
+            
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="card dashboard-card text-center">
+                        <div class="card-body">
+                            <i class="bi bi-graph-up dashboard-icon"></i>
+                            <h3 id="progress">75%</h3>
+                            <p>Overall Progress</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="card dashboard-card text-center">
+                        <div class="card-body">
+                            <i class="bi bi-trophy dashboard-icon"></i>
+                            <h3 id="badges">3</h3>
+                            <p>Badges Earned</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="card dashboard-card text-center">
+                        <div class="card-body">
+                            <i class="bi bi-star dashboard-icon"></i>
+                            <h3 id="points">0</h3>
+                            <p>Points Earned</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="card dashboard-card text-center">
+                        <div class="card-body">
+                            <i class="bi bi-lightning dashboard-icon"></i>
+                            <h3 id="streak">0</h3>
+                            <p>Day Streak</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Details -->
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5><i class="bi bi-journal-check"></i> Enrolled Courses</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul id="enrolledList" class="list-group"></ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h5><i class="bi bi-cloud-upload"></i> Your Uploads</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="uploadedContent"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-header bg-warning text-dark">
+                            <h5><i class="bi bi-clipboard-data"></i> Quiz Results</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul id="quizResults" class="list-group"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NEW: Learning Analytics -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h5><i class="bi bi-graph-up-arrow"></i> Learning Analytics</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Time Spent by Subject</h6>
+                                    <div id="timeChart"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Performance Trends</h6>
+                                    <div id="performanceChart"></div>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <h6>Strengths</h6>
+                                    <ul id="strengthsList"></ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Areas for Improvement</h6>
+                                    <ul id="improvementList"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NEW: Certificates & Achievements -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-warning text-dark">
+                            <h5><i class="bi bi-award"></i> Certificates & Achievements</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="certificate-card">
+                                        <i class="bi bi-trophy-fill text-warning"></i>
+                                        <h6>Course Completion</h6>
+                                        <p>Complete 5 courses</p>
+                                        <div class="progress">
+                                            <div class="progress-bar" id="certProgress1" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="certificate-card">
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                        <h6>Quiz Master</h6>
+                                        <p>Score 90%+ in 10 quizzes</p>
+                                        <div class="progress">
+                                            <div class="progress-bar" id="certProgress2" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="certificate-card">
+                                        <i class="bi bi-people-fill text-warning"></i>
+                                        <h6>Community Leader</h6>
+                                        <p>Help 20 students</p>
+                                        <div class="progress">
+                                            <div class="progress-bar" id="certProgress3" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" onclick="downloadCertificate()">
+                                <i class="bi bi-download"></i> Download Certificate
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW: Health & Wellness Section -->
+    <section id="health" class="section bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5"><i class="bi bi-heart-pulse"></i> Health & Wellness</h2>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <i class="bi bi-apple health-icon"></i>
+                            <h5>Nutrition Education</h5>
+                            <p>Learn about healthy eating habits and balanced diet</p>
+                            <button class="btn btn-success" onclick="openHealthModule('nutrition')">Start Learning</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <i class="bi bi-activity health-icon"></i>
+                            <h5>Physical Fitness</h5>
+                            <p>Exercise routines and yoga for students</p>
+                            <button class="btn btn-success" onclick="openHealthModule('fitness')">Start Learning</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <i class="bi bi-emoji-smile health-icon"></i>
+                            <h5>Mental Health</h5>
+                            <p>Stress management and emotional wellness</p>
+                            <button class="btn btn-success" onclick="openHealthModule('mental')">Start Learning</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quiz Modal -->
+    <div class="modal fade" id="quizModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="quizTitle">Quiz</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="quizContent"></div>
+                    <div id="quizTimer" class="alert alert-info mt-3" style="display:none;">
+                        <i class="bi bi-clock"></i> Time Remaining: <span id="timeLeft">10:00</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" onclick="submitQuiz()">Submit Quiz</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assessment Modal -->
+    <div class="modal fade" id="assessmentModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Skill Assessment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="assessmentContent"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="submitAssessment()">Submit Assessment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mentor Modal -->
+    <div class="modal fade" id="mentorModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Find a Mentor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="mentor-card">
+                                <img src="https://via.placeholder.com/100" alt="Mentor" class="rounded-circle">
+                                <h6>Dr. Rajesh Kumar</h6>
+                                <p class="text-muted">Mathematics Expert</p>
+                                <p><i class="bi bi-star-fill text-warning"></i> 4.8 Rating</p>
+                                <button class="btn btn-sm btn-primary" onclick="connectMentor('Rajesh')">Connect</button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="mentor-card">
+                                <img src="https://via.placeholder.com/100" alt="Mentor" class="rounded-circle">
+                                <h6>Priya Sharma</h6>
+                                <p class="text-muted">Science Teacher</p>
+                                <p><i class="bi bi-star-fill text-warning"></i> 4.9 Rating</p>
+                                <button class="btn btn-sm btn-primary" onclick="connectMentor('Priya')">Connect</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Library Modal -->
+    <div class="modal fade" id="libraryModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="libraryTitle">Library</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="libraryContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h5><i class="bi bi-book"></i> RuralEd Hub</h5>
+                    <p>Empowering rural education through technology and community.</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#courses">Courses</a></li>
+                        <li><a href="#resources">Resources</a></li>
+                        <li><a href="#forum">Community</a></li>
+                        <li><a href="#dashboard">Dashboard</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h5>Connect With Us</h5>
+                    <div class="social-links">
+                        <a href="https://wa.me/?text=Join%20RuralEd%20Hub!" target="_blank" class="btn btn-success btn-sm">
+                            <i class="bi bi-whatsapp"></i> WhatsApp
+                        </a>
+                        <a href="https://www.instagram.com/" target="_blank" class="btn btn-info btn-sm">
+                            <i class="bi bi-instagram"></i> Instagram
+                        </a>
+                        <a href="https://twitter.com/" target="_blank" class="btn btn-dark btn-sm">
+                            <i class="bi bi-twitter"></i> Twitter
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <p class="text-center">&copy; 2025 RuralEd Hub. Free education for a brighter future.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
